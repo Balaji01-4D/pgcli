@@ -1,18 +1,16 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
-package main
+package cli
 
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
-	"pgcli/internals/pg"
+	"pgcli/internals/database"
+	"pgcli/internals/repl"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
+
 
 var (
 	host string
@@ -23,19 +21,11 @@ var (
 	dbnameOpt string
 )
 
-
-func main() {
-	Execute()
-}
-
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pgcli [DBNAME] [USERNAME]",
 	Short: "Interactive PostgreSQL command-line client for querying and managing databases.",
-	Long: `pgcli is an interactive PostgreSQL command-line client for connecting to databases, running SQL queries, and inspecting schema objects.
-It aims to provide a simple, scriptable interface for everyday database tasks such as querying, debugging, and administration.`,
-	Version: "0.0.1",
+	Version: GetVersion(),
 
 	Args: cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) { 
@@ -52,40 +42,23 @@ It aims to provide a simple, scriptable interface for everyday database tasks su
 		}
 
 
-        database, user := resolveDBAndUser(dbnameOpt, usernameOpt, argDB, argUser)
+        db, _ := resolveDBAndUser(dbnameOpt, usernameOpt, argDB, argUser)
 
-        fmt.Println("Final Database:", database)
-        fmt.Println("Final User:", user)
-
-
-		if strings.Contains(database, "://") {
+		
+		if strings.Contains(db, "://") {
+			fmt.Println("Connecting using DSN:", db)
 			ctx := context.Background()
-			pool, err := pg.Connect(ctx, database)
+
+			pool, err := database.Connect(ctx, db)
 			if err != nil {
-				panic(err)
+				fmt.Fprintf(os.Stderr, "Error connecting to database: %v\n", err)
+				os.Exit(1)
 			}
 			defer pool.Close()
 
-			exec := pg.NewExecutor(pool)
-			st, err := exec.Query(ctx, "SELECT * FROM students")
-			if err != nil {
-				panic(err)
-			}
-			defer st.Close()
-			fmt.Println(st.Columns())
-			fmt.Println(st.Duration())
+			exec := database.NewExecutor(pool)
+			repl.StartREPL(ctx, exec)
 
-			for {
-				row, err := st.Next()
-				if err != nil {
-					if err == io.EOF {
-						break
-					} else {
-						panic(err)
-					}
-				}
-				fmt.Println(row)
-			}
 		}
 
 	},

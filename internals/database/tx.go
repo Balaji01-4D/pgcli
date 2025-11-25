@@ -1,4 +1,4 @@
-package pg
+package database
 
 import (
 	"context"
@@ -8,13 +8,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-
 type pgTransaction struct {
 	conn *pgxpool.Conn // keep the connection so we can release on commit/rollback
 	tx   pgx.Tx
 }
 
-func (e *Excutor) Begin(ctx context.Context) (Tx, error) {
+func (e *Executor) Begin(ctx context.Context) (Tx, error) {
 	conn, err := e.Pool.Acquire(ctx)
 	if err != nil {
 		return nil, err
@@ -32,7 +31,7 @@ func (e *Excutor) Begin(ctx context.Context) (Tx, error) {
 	}, nil
 }
 
-func (t *pgTransaction) Query(ctx context.Context, sql string, args ...interface{}) (RowStreamer, error) {
+func (t *pgTransaction) Query(ctx context.Context, sql string, args ...interface{}) (*QueryResult, error) {
 	start := time.Now()
 	rows, err := t.tx.Query(ctx, sql, args...)
 	if err != nil {
@@ -44,11 +43,13 @@ func (t *pgTransaction) Query(ctx context.Context, sql string, args ...interface
 	for i := range fds {
 		cols[i] = string(fds[i].Name)
 	}
-	return &rowStreamer{
-		rows:    rows,
-		columns: cols,
-		closed:  false,
-		duration: dur,
+	return &QueryResult{
+		rowStreamer: rowStreamer{
+			rows:     rows,
+			columns:  cols,
+			closed:   false,
+			duration: dur,
+		},
 	}, nil
 }
 

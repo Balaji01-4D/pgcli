@@ -27,3 +27,13 @@ func CommandType(sql string) string {
 	}
 	return "EXECUTE"
 }
+
+
+func IsQuery(sql string) bool {
+	return CommandType(sql) == "QUERY"
+}
+
+
+func IsExecute(sql string) bool {
+	return CommandType(sql) == "EXECUTE"
+}

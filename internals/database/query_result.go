@@ -1,12 +1,59 @@
-package pg
+package database
 
 import (
+	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/olekukonko/tablewriter"
 )
 
+// query → returns rows (SELECT, SHOW, etc.)
+
+
+type QueryResult struct {
+	rowStreamer
+}
+
+func (q *QueryResult) RenderTable() string {
+	defer q.Close()
+
+	var sb strings.Builder
+	table := tablewriter.NewWriter(&sb)
+
+	cols := q.Columns()
+	if len(cols) == 0 {
+		return "(no columns)"
+	}
+	table.Header(cols)
+
+	var rows [][]string
+	for {
+		row, err := q.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Sprintf("Error reading rows: %v", err)
+		}
+
+		strRow := make([]string, len(row))
+		for i, v := range row {
+			if v == nil {
+				strRow[i] = "NULL"
+			} else {
+				strRow[i] = fmt.Sprintf("%v", v)
+			}
+		}
+		rows = append(rows, strRow)
+	}
+	table.Bulk(rows)
+	table.Render()
+
+	return sb.String()
+}
 
 type rowStreamer struct {
 	rows    pgx.Rows
@@ -57,3 +104,9 @@ func (r *rowStreamer) Close() error {
 func (r *rowStreamer) Duration() time.Duration {
 	return r.duration
 }
+
+func (r *rowStreamer) GetType() string {
+	return "QUERY"
+}
+
+
