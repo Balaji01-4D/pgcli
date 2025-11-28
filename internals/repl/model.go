@@ -1,8 +1,28 @@
 package repl
 
-// NOT IMPLEMENTED YET
-type DBConfig struct {
+import (
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/knz/bubbline"
+)
+
+
+type Model struct {
+	*bubbline.Editor
 	CurrentDB string
-	Username  string
 }
+
+func NewModel(db string) *Model {
+	lineedit := bubbline.New()
+	lineedit.CursorMode = cursor.CursorBlink
+	lineedit.Prompt = fmt.Sprintf("%s> ", db)
+
+	return &Model{
+		Editor:   lineedit,
+		CurrentDB: db,
+	}
+}
+
+
 

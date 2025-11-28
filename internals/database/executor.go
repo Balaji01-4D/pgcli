@@ -2,12 +2,12 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"pgcli/internals/parser"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
 
 // skip these two interfaces for now
 type Tx interface {
@@ -21,17 +21,44 @@ type Result interface {
 	GetType() string
 }
 
-
 // executor struct to execute queries
 type Executor struct {
-	Pool *pgxpool.Pool
+	Host     string
+	Port     uint16
+	Database string
+	Schema   string
+	User     string
+	Password string
+	URI      string
+	Pool     *pgxpool.Pool
 }
 
+
+
 // constructor function to create new executor
-func NewExecutor(pool *pgxpool.Pool) Executor {
-	return Executor{
-		Pool: pool,
+func NewExecutor(host, database string, user string, password string,
+	port uint16, dsn string, ctx context.Context) (*Executor, error) {
+
+	// create a new connection pool
+	pool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		return nil, err
 	}
+
+	// test the connection
+	err = pool.Ping(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &Executor{
+		Host:     host,
+		Port:     port,
+		Database: database,
+		User:     user,
+		Password: password,
+		URI:      dsn,
+		Pool:     pool,
+	}, nil
 }
 
 // For executing queries like SELECT, SHOW etc.
@@ -78,4 +105,22 @@ func (e *Executor) Execute(ctx context.Context, sql string, args ...interface{})
 		return e.query(ctx, sql, args...)
 	}
 	return e.exec(ctx, sql, args...)
+}
+
+func (e *Executor) Close() {
+	if e.Pool != nil {
+		e.Pool.Close()
+	}
+}
+
+func (e *Executor) Ping(ctx context.Context) error {
+	if e.Pool == nil {
+		return fmt.Errorf("database not connected")
+	}
+	return e.Pool.Ping(ctx)
+}
+
+
+func (e *Executor) IsConnected() bool {
+	return e.Pool != nil
 }
