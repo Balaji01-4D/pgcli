@@ -5,6 +5,7 @@ go 1.25.4
 require (
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/jedib0t/go-pretty/v6 v6.7.5
+	github.com/pelletier/go-toml/v2 v2.2.2
 	github.com/pganalyze/pg_query_go/v6 v6.1.0
 	github.com/spf13/cobra v1.10.1
 )
@@ -35,6 +36,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.43.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
