@@ -1,27 +1,25 @@
 package repl
 
-import (
-	"fmt"
-
-	"github.com/charmbracelet/bubbles/cursor"
-	"github.com/knz/bubbline"
-)
+import "github.com/elk-language/go-prompt"
 
 
-type Model struct {
-	*bubbline.Editor
-	CurrentDB string
+type Repl struct {
+	db string
 }
 
-func NewModel(db string) *Model {
-	lineedit := bubbline.New()
-	lineedit.CursorMode = cursor.CursorBlink
-	lineedit.Prompt = fmt.Sprintf("%s> ", db)
+func (r *Repl) GetPrefix() string {
+	return r.db
+}
 
-	return &Model{
-		Editor:   lineedit,
-		CurrentDB: db,
-	}
+func (r *Repl) GetLine() string {
+	text := prompt.Input(
+		prompt.WithPrefix(r.GetPrefix()),
+	)
+	return text
+}
+
+func NewModel(db string) *Repl {
+	return &Repl{db: db}
 }
 
 

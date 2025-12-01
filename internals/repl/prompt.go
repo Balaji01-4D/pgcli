@@ -3,10 +3,8 @@ package repl
 func RunRepl(db string) (string, error) {
 	m := NewModel(db)
 
-	input, err := m.GetLine()
-	if err != nil {
-		return "", err
-	}
+	input := m.GetLine()
+
 
 	// p := tea.NewProgram(m)
 
