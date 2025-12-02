@@ -1,6 +1,10 @@
 package repl
 
-import "github.com/elk-language/go-prompt"
+import (
+	"pgcli/internals/completer"
+
+	"github.com/elk-language/go-prompt"
+)
 
 
 type Repl struct {
@@ -8,12 +12,13 @@ type Repl struct {
 }
 
 func (r *Repl) GetPrefix() string {
-	return r.db
+	return r.db + "> "
 }
 
 func (r *Repl) GetLine() string {
 	text := prompt.Input(
 		prompt.WithPrefix(r.GetPrefix()),
+		prompt.WithCompleter(completer.SQLKeywordCompleter),
 	)
 	return text
 }
