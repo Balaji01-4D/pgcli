@@ -1,8 +1,6 @@
 package repl
 
 import (
-	"pgcli/internals/completer"
-
 	"github.com/elk-language/go-prompt"
 )
 
@@ -18,7 +16,6 @@ func (r *Repl) GetPrefix() string {
 func (r *Repl) GetLine() string {
 	text := prompt.Input(
 		prompt.WithPrefix(r.GetPrefix()),
-		prompt.WithCompleter(completer.SQLKeywordCompleter),
 	)
 	return text
 }
