@@ -68,9 +68,8 @@ func (r *rowStreamer) GetType() string {
 }
 
 
-func (r *QueryResult) Render() string {
+func (r *QueryResult) Render() (table.Writer, error) {
 	tw := table.NewWriter()
-	tw.SetStyle(table.StyleLight)
 
 	row := make(table.Row, len(r.columns))
 	for i, col := range r.columns {
@@ -84,14 +83,14 @@ func (r *QueryResult) Render() string {
 			break
 		}
 		if err != nil {
-			return "Error fetching rows: " + err.Error()
+			return nil, err
 		}
 		row := make(table.Row, len(values))
 		copy(row, values)
 		tw.AppendRow(row)
 	}
 
-	tw.SetCaption("Query executed in %s", r.duration.String())
-	return tw.Render()
+	tw.SetCaption("Time: %v", r.duration)
+	return tw, nil
 	
 }
