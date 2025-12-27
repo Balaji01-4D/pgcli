@@ -19,7 +19,7 @@ func (e *ExecResult) GetType() string {
 
 func (e *ExecResult) Render() string {
 	return fmt.Sprintf(
-		"Status: %s\nRows Affected: %d\nDuration: %s",
+		"Status: %s\nRows Affected: %d\nTime: %s",
 		e.Status,
 		e.RowsAffected,
 		e.Duration.String(),
