@@ -1,2 +1,3 @@
-/app
-pgcli-go.log
+/logs
+
+/bin
