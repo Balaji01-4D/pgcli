@@ -23,6 +23,7 @@ import (
 const (
 	Exit pgxspecial.SpecialResultKind = 100 + iota
 	ChangeDB
+	conninfo
 )
 
 type Postgres struct {
@@ -33,18 +34,24 @@ type Postgres struct {
 	ctx                 context.Context
 }
 
-type PostgresExit struct{}
+type ActionExit struct{}
 
-func (e PostgresExit) ResultKind() pgxspecial.SpecialResultKind {
+func (e ActionExit) ResultKind() pgxspecial.SpecialResultKind {
 	return Exit
 }
 
-type PostgresChangeDB struct {
+type ActionChangeDB struct {
 	dbName string
 }
 
-func (e PostgresChangeDB) ResultKind() pgxspecial.SpecialResultKind {
+func (c ActionChangeDB) ResultKind() pgxspecial.SpecialResultKind {
 	return ChangeDB
+}
+
+type ActionGetConnInfo struct{}
+
+func (g ActionGetConnInfo) ResultKind() pgxspecial.SpecialResultKind {
+	return conninfo
 }
 
 func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context) *Postgres {
@@ -145,20 +152,30 @@ func (p *Postgres) registerSpecialCommands() {
 		Syntax:      "\\q",
 		Description: "Quit Pgxcli",
 		Handler: func(_ context.Context, _ database.Queryer, _ string, _ bool) (pgxspecial.SpecialCommandResult, error) {
-			return PostgresExit{}, nil
+			return ActionExit{}, nil
 		},
 		CaseSensitive: true,
 	})
 
 	pgxspecial.RegisterCommand(pgxspecial.SpecialCommandRegistry{
 		Cmd:         "\\c",
-		Syntax:      "\\c [database_name]",
+		Syntax:      "\\c database_name",
 		Description: "Change a new database",
 		Handler: func(_ context.Context, _ database.Queryer, s string, _ bool) (pgxspecial.SpecialCommandResult, error) {
-			return PostgresChangeDB{dbName: s}, nil
+			return ActionChangeDB{dbName: s}, nil
 		},
 		CaseSensitive: true,
 		Alias:         []string{"\\connect"},
+	})
+
+	pgxspecial.RegisterCommand(pgxspecial.SpecialCommandRegistry{
+		Cmd: "\\conninfo",
+		Syntax: "\\conninfo",
+		Description: "Get connection details",
+		Handler: func(ctx context.Context, db database.Queryer, args string, verbose bool) (pgxspecial.SpecialCommandResult, error) {
+			return ActionGetConnInfo{}, nil
+		},
+		CaseSensitive: false,
 	})
 
 }
@@ -217,7 +234,7 @@ func (p *Postgres) RunCli() error {
 				break
 			}
 			if metaResult.ResultKind() == ChangeDB {
-				s := metaResult.(PostgresChangeDB).dbName
+				s := metaResult.(ActionChangeDB).dbName
 				if strings.TrimSpace(s) != "" {
 					err := p.ChangeDatabase(s)
 					if err != nil {
@@ -227,6 +244,21 @@ func (p *Postgres) RunCli() error {
 				}
 				repl.Print(fmt.Sprintf("You are now connected to database %q as user %q", p.CurrentBD, p.Executor.User))
 				repl.PrintTime(time.Since(start))
+				continue
+			}
+			if metaResult.ResultKind() == conninfo {
+			
+				host := p.Executor.Pool.Config().ConnConfig.Host 
+				if strings.HasPrefix(p.Executor.Host, "/") {
+					host = fmt.Sprintf("Socket %q", p.Executor.Host)
+				} else {
+					host = fmt.Sprintf("Host %q", p.Executor.Host)
+				}
+				repl.Print(
+					fmt.Sprintf("You are connected to database %q as user %q on %s on port %d",
+					 p.CurrentBD, p.Executor.User, host, p.Executor.Port,
+					),
+				)
 				continue
 			}
 
@@ -317,6 +349,8 @@ func HandleRowsResult(result pgxspecial.SpecialCommandResult) ([]table.Writer, e
 }
 
 func RenderRows(pgxRows pgx.Rows) table.Writer {
+	defer pgxRows.Close()
+
 	tw := table.NewWriter()
 
 	columns := make(table.Row, len(pgxRows.FieldDescriptions()))
