@@ -22,6 +22,7 @@ import (
 
 const (
 	Exit pgxspecial.SpecialResultKind = 100 + iota
+	ChangeDB
 )
 
 type Postgres struct {
@@ -38,21 +39,24 @@ func (e PostgresExit) ResultKind() pgxspecial.SpecialResultKind {
 	return Exit
 }
 
+type PostgresChangeDB struct {
+	dbName string
+}
+
+func (e PostgresChangeDB) ResultKind() pgxspecial.SpecialResultKind {
+	return ChangeDB
+}
+
 func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context) *Postgres {
-	pgxspecial.RegisterCommand(pgxspecial.SpecialCommandRegistry{
-		Cmd:         "\\q",
-		Syntax:      "\\q",
-		Description: "Quit Pgxcli",
-		Handler: func(_ context.Context, _ database.Queryer, _ string, _ bool) (pgxspecial.SpecialCommandResult, error) {
-			return &PostgresExit{}, nil
-		},
-		CaseSensitive: true,
-	})
-	return &Postgres{
+
+	postgres := &Postgres{
 		NeverPasswordPrompt: neverPasswordPrompt,
 		ForcePasswordPrompt: forcePasswordPrompt,
 		ctx:                 ctx,
 	}
+	postgres.registerSpecialCommands()
+
+	return postgres
 }
 
 func (p *Postgres) Connect(host, user, password, database, dsn string, port uint16) error {
@@ -135,6 +139,30 @@ func (p *Postgres) GetConnectionInfo() {
 	)
 }
 
+func (p *Postgres) registerSpecialCommands() {
+	pgxspecial.RegisterCommand(pgxspecial.SpecialCommandRegistry{
+		Cmd:         "\\q",
+		Syntax:      "\\q",
+		Description: "Quit Pgxcli",
+		Handler: func(_ context.Context, _ database.Queryer, _ string, _ bool) (pgxspecial.SpecialCommandResult, error) {
+			return PostgresExit{}, nil
+		},
+		CaseSensitive: true,
+	})
+
+	pgxspecial.RegisterCommand(pgxspecial.SpecialCommandRegistry{
+		Cmd:         "\\c",
+		Syntax:      "\\c [database_name]",
+		Description: "Change a new database",
+		Handler: func(_ context.Context, _ database.Queryer, s string, _ bool) (pgxspecial.SpecialCommandResult, error) {
+			return PostgresChangeDB{dbName: s}, nil
+		},
+		CaseSensitive: true,
+		Alias:         []string{"\\connect"},
+	})
+
+}
+
 func (p *Postgres) ChangeDatabase(dbName string) error {
 	if !p.IsConnected() {
 		return fmt.Errorf("not connected to any database")
@@ -151,7 +179,7 @@ func (p *Postgres) ChangeDatabase(dbName string) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to create new executor: %w. Keeping the current database connection to %s", err, p.CurrentBD)
+		return err
 	}
 	p.Executor = exec
 	p.CurrentBD = dbName
@@ -178,20 +206,6 @@ func (p *Postgres) RunCli() error {
 
 		start := time.Now()
 
-		if p.IsChangeDBCommand(query) {
-			parts := strings.Fields(query)
-			if len(parts) < 2 {
-				repl.PrintError(fmt.Errorf("database name not provided"))
-				continue
-			}
-			newDB := parts[1]
-			err := p.ChangeDatabase(newDB)
-			if err != nil {
-				repl.PrintError(err)
-			}
-			continue
-		}
-
 		metaResult, okay, err := pgxspecial.ExecuteSpecialCommand(p.ctx, p.Executor.Pool, query)
 		if err != nil {
 			repl.PrintError(err)
@@ -201,6 +215,19 @@ func (p *Postgres) RunCli() error {
 			// check for exit command
 			if metaResult.ResultKind() == Exit {
 				break
+			}
+			if metaResult.ResultKind() == ChangeDB {
+				s := metaResult.(PostgresChangeDB).dbName
+				if strings.TrimSpace(s) != "" {
+					err := p.ChangeDatabase(s)
+					if err != nil {
+						repl.PrintError(err)
+						repl.Print("Previous connection kept")
+					}
+				}
+				repl.Print(fmt.Sprintf("You are now connected to database %q as user %q", p.CurrentBD, p.Executor.User))
+				repl.PrintTime(time.Since(start))
+				continue
 			}
 
 			splCommandResults, err := HandleSpecialCommmand(metaResult)
