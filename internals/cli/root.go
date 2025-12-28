@@ -50,7 +50,7 @@ var rootCmd = &cobra.Command{
 
 		// currently supporting only DSN connection string example pgcli postgres://user:pass@localhost:5432/mydb
 		ctx := context.Background()
-		postgres := database.NewPostgres(neverPrompt, forcePrompt, ctx)
+		postgres := database.New(neverPrompt, forcePrompt, ctx)
 
 		defer postgres.Close()
 
