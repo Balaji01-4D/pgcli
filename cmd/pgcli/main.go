@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 Balaji <balaji.jothi.in@gmail.com>
+Copyright © 2025 Balaji (பாலாஜி) <balaji.jothi.in@gmail.com>
 */
 package main
 
