@@ -23,7 +23,7 @@ import (
 
 const (
 	DefaultPrompt = `\u@\h:\d> `
-	MaxLenPrompt = 30
+	MaxLenPrompt  = 30
 )
 
 const (
@@ -38,7 +38,7 @@ type Postgres struct {
 	ForcePasswordPrompt bool
 	NeverPasswordPrompt bool
 	ctx                 context.Context
-	Config			    config.Config
+	Config              config.Config
 }
 
 func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context) *Postgres {
@@ -72,7 +72,6 @@ type ActionGetConnInfo struct{}
 func (g ActionGetConnInfo) ResultKind() pgxspecial.SpecialResultKind {
 	return conninfo
 }
-
 
 func (p *Postgres) Connect(host, user, password, database, dsn string, port uint16) error {
 
@@ -255,7 +254,7 @@ func (p *Postgres) RunCli() error {
 			}
 			if metaResult.ResultKind() == conninfo {
 
-				var host string 
+				var host string
 				if strings.HasPrefix(p.Executor.Host, "/") {
 					host = fmt.Sprintf("Socket %q", p.Executor.Host)
 				} else {
