@@ -1,0 +1,9 @@
+# Postgres prompt
+# \t - Current date and time
+# \u - Username
+# \h - Short hostname of the server (up to first '.')
+# \H - Hostname of the server
+# \d - Database name
+# \p - Database port
+# \n - Newline
+prompt = '\u@\h:\d> '
