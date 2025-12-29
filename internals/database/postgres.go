@@ -289,14 +289,14 @@ func (p *Postgres) RunCli() error {
 		}
 
 		execTime := time.Since(start)
-		HandleResult(result, repl, execTime)
+		HandleQueryResult(result, repl, execTime)
 		continue
 	}
 
 	return nil
 }
 
-func HandleResult(result Result, repl *repl.Repl, execTime time.Duration) {
+func HandleQueryResult(result Result, repl *repl.Repl, execTime time.Duration) {
 	switch res := result.(type) {
 	case *QueryResult:
 		tw, err := res.Render()
@@ -305,10 +305,10 @@ func HandleResult(result Result, repl *repl.Repl, execTime time.Duration) {
 			return
 		}
 		repl.Print(tw.Render())
-		repl.PrintTime(execTime)
+		repl.PrintTime(res.duration)
 	case *ExecResult:
-		repl.Print(res.Render())
-		repl.PrintTime(execTime)
+		repl.Print(res.Status)
+		repl.PrintTime(res.Duration)
 	}
 }
 
