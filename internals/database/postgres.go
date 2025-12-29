@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"pgcli/internals/config"
 	"pgcli/internals/logger"
 	"pgcli/internals/repl"
 	"strings"
@@ -21,6 +22,11 @@ import (
 )
 
 const (
+	DefaultPrompt = `\u@\h:\d> `
+	MaxLenPrompt = 30
+)
+
+const (
 	Exit pgxspecial.SpecialResultKind = 100 + iota
 	ChangeDB
 	conninfo
@@ -32,6 +38,7 @@ type Postgres struct {
 	ForcePasswordPrompt bool
 	NeverPasswordPrompt bool
 	ctx                 context.Context
+	Config			    config.Config
 }
 
 type ActionExit struct{}
@@ -137,7 +144,7 @@ func (p *Postgres) IsConnected() bool {
 
 func (p *Postgres) GetConnectionInfo() {
 	logger.Log.Debug("Connection information",
-		"connection string", p.Executor.Pool.Config().ConnString(),
+		"connection string", p.Executor.Conn.Config().ConnString(),
 		"host", p.Executor.Host,
 		"Port", p.Executor.Port,
 		"Database", p.Executor.Database,
@@ -214,7 +221,7 @@ func (p *Postgres) RunCli() error {
 	defer repl.Close()
 
 	for {
-		query := repl.Read()
+		query := repl.Read(p.CurrentBD)
 
 		// check for empty string
 		if strings.TrimSpace(query) == "" {
@@ -223,7 +230,7 @@ func (p *Postgres) RunCli() error {
 
 		start := time.Now()
 
-		metaResult, okay, err := pgxspecial.ExecuteSpecialCommand(p.ctx, p.Executor.Pool, query)
+		metaResult, okay, err := pgxspecial.ExecuteSpecialCommand(p.ctx, p.Executor.Conn, query)
 		if err != nil {
 			repl.PrintError(err)
 			continue
@@ -248,7 +255,7 @@ func (p *Postgres) RunCli() error {
 			}
 			if metaResult.ResultKind() == conninfo {
 
-				host := p.Executor.Pool.Config().ConnConfig.Host
+				var host string 
 				if strings.HasPrefix(p.Executor.Host, "/") {
 					host = fmt.Sprintf("Socket %q", p.Executor.Host)
 				} else {
