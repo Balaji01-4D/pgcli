@@ -35,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Args: cobra.MaximumNArgs(2), // allowing maximum 2 args: DBNAME and USERNAME
 	Run: func(cmd *cobra.Command, args []string) {
 
-		logger.InitLogger(debug, "logs/pgcli-go.log")
+		logger.InitLogger(debug, "logs/pgxcli.log")
 		logger.Log.Info("pgcli started")
 
 		var argDB string   //  for storing positional DBNAME argument ex: pgcli mydb then argDB = "mydb"
