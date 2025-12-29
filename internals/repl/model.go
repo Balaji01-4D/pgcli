@@ -30,9 +30,9 @@ func NewModel(db string) *Repl {
 	return repl
 }
 
-func (r *Repl) Read() string {
+func (r *Repl) Read(prefix string) string {
 	text := prompt.Input(
-		r.getPromptOptions()...,
+		r.getPromptOptions(prefix)...,
 	)
 	r.addToHistory(text)
 	return text
@@ -87,17 +87,13 @@ func (r *Repl) addToHistory(command string) {
 	r.history = append(r.history, command)
 }
 
-func (r *Repl) getPrefix() string {
-	return r.db + "> "
-}
-
 func (r *Repl) Close() {
 	r.saveHistory()
 }
 
-func (r *Repl) getPromptOptions() []prompt.Option {
+func (r *Repl) getPromptOptions(prefix string) []prompt.Option {
 	return []prompt.Option{
-		prompt.WithPrefix(r.getPrefix()),
+		prompt.WithPrefix(prefix),
 		prompt.WithHistory(r.history),
 		prompt.WithTitle("pgxcli"),
 		prompt.WithHistorySize(100),
