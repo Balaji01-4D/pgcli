@@ -55,7 +55,7 @@ func NewExecutor(host, database string, user string, password string,
 	// create a new connection conn
 	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
-		logger.Log.Error("Failed to create connection pool", "error", err)
+		logger.Log.Error("Failed to create connection", "error", err)
 		return nil, err
 	}
 
