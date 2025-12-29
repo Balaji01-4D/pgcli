@@ -1,3 +1,5 @@
+github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
+github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/balaji01-4d/pgxspecial v0.2.0 h1:mR9WjqG1id56FtzsMzZPiJU5ZY32WV4rktWU5mVcYNw=
 github.com/balaji01-4d/pgxspecial v0.2.0/go.mod h1:w0sjtoNX79Ms2mPn0ynDj2cbpnktfR7Ed+399kvAaMg=
 github.com/clipperhouse/stringish v0.1.1 h1:+NSqMOr3GR6k1FdRhhnXrLfztGzuG+VuFDfatpWHKCs=
