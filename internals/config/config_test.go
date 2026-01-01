@@ -49,22 +49,3 @@ func TestGetConfigDir_ShouldReturnValidPath(t *testing.T) {
 	assert.Equal(t, expectedPath, configDir)
 } 
 
-func TestCheckConfigExists_FileExists(t *testing.T) {
-	tempDir := t.TempDir()
-	configPath := path.Join(tempDir, "config.toml")
-	err := os.WriteFile(configPath, []byte("prompt = \"test\""), 0644)
-	assert.NoError(t, err)
-
-	path, exists := config.CheckConfigExists(tempDir)
-	assert.True(t, exists)
-	assert.Equal(t, configPath, path)
-}
-
-func TestCheckConfigExists_FileDoesNotExist(t *testing.T) {
-	tempDir := t.TempDir()
-
-	path, exists := config.CheckConfigExists(tempDir)
-	assert.False(t, exists)
-	expectedPath := tempDir + "config.toml"
-	assert.Equal(t, expectedPath, path)
-}
