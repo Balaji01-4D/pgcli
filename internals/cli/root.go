@@ -3,9 +3,9 @@ package cli
 import (
 	"context"
 	"os"
-	"pgcli/internals/config"
-	"pgcli/internals/database"
-	"pgcli/internals/logger"
+	"pgxcli/internals/config"
+	"pgxcli/internals/database"
+	"pgxcli/internals/logger"
 	"strings"
 
 	"github.com/fatih/color"
@@ -29,7 +29,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "pgcli [DBNAME] [USERNAME]",
+	Use:     "pgxcli [DBNAME] [USERNAME]",
 	Short:   "Interactive PostgreSQL command-line client for querying and managing databases.",
 	Version: GetVersion(),
 
@@ -37,10 +37,10 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		logger.InitLogger(debug, "logs/pgxcli.log")
-		logger.Log.Info("pgcli started")
+		logger.Log.Info("pgxcli started")
 
-		var argDB string   //  for storing positional DBNAME argument ex: pgcli mydb then argDB = "mydb"
-		var argUser string // for storing positional USERNAME argument ex: pgcli mydb myuser then argUser = "myuser"
+		var argDB string   //  for storing positional DBNAME argument ex: pgxcli mydb then argDB = "mydb"
+		var argUser string // for storing positional USERNAME argument ex: pgxcli mydb myuser then argUser = "myuser"
 
 		if len(args) > 0 {
 			argDB = args[0] // first argument as DBNAME
@@ -49,8 +49,9 @@ var rootCmd = &cobra.Command{
 			argUser = args[1] // second argument as USERNAME
 		}
 
-		// when pgcli -d mydb myuser, here database name is given as flag then next arguement is considered as user
+		// when pgxcli -d mydb myuser, here database name is given as flag then next arguement is considered as user
 		finalDB, finalUser := resolveDBAndUser(dbnameOpt, usernameOpt, argDB, argUser)
+		// currently we dont use the user
 
 		cfg := config.DefaultConfig
 
