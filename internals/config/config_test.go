@@ -40,12 +40,19 @@ func TestLoadConfig_MissingFile(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetConfigDir_ShouldReturnValidPath(t *testing.T) {
-	tempdir := t.TempDir()
-	os.Setenv("HOME", tempdir)
-	configDir, err := config.GetConfigDir()
+func TestSaveConfig(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := path.Join(tempDir, "config.toml")
+
+	cfg := config.Config{
+		Prompt: "\\u@\\h:\\d> ",
+	}
+	
+	err := config.SaveConfig(configPath, cfg)
 	assert.NoError(t, err)
-	expectedPath := path.Join(tempdir, ".config", "pgxcli")
-	assert.Equal(t, expectedPath, configDir)
-} 
+	loadedCfg, err := config.LoadConfig(configPath)
+	assert.NoError(t, err)
+	assert.Equal(t, cfg.Prompt, loadedCfg.Prompt)
+}
+
 
