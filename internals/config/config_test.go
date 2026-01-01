@@ -3,7 +3,7 @@ package config_test
 import (
 	"os"
 	path "path/filepath"
-	"pgcli/internals/config"
+	"pgxcli/internals/config"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
