@@ -3,10 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
-	"pgcli/internals/logger"
-	"pgcli/internals/parser"
 	"strings"
 	"time"
+
+	"github.com/balaji01-4d/pgxcli/internals/logger"
+	"github.com/balaji01-4d/pgxcli/internals/parser"
 
 	"github.com/jackc/pgx/v5"
 )

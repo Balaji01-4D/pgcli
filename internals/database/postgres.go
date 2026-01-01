@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"pgcli/internals/config"
-	"pgcli/internals/logger"
-	"pgcli/internals/repl"
 	"strings"
 	"time"
+
+	"github.com/balaji01-4d/pgxcli/internals/config"
+	"github.com/balaji01-4d/pgxcli/internals/logger"
+	"github.com/balaji01-4d/pgxcli/internals/repl"
 
 	osUser "os/user"
 

@@ -3,10 +3,11 @@ package cli
 import (
 	"context"
 	"os"
-	"pgxcli/internals/config"
-	"pgxcli/internals/database"
-	"pgxcli/internals/logger"
 	"strings"
+
+	"github.com/balaji01-4d/pgxcli/internals/config"
+	"github.com/balaji01-4d/pgxcli/internals/database"
+	"github.com/balaji01-4d/pgxcli/internals/logger"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

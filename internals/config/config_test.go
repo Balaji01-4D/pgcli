@@ -3,8 +3,9 @@ package config_test
 import (
 	"os"
 	path "path/filepath"
-	"pgxcli/internals/config"
 	"testing"
+
+	"github.com/balaji01-4d/pgxcli/internals/config"
 
 	"github.com/stretchr/testify/assert"
 )
