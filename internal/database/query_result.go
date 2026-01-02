@@ -67,7 +67,6 @@ func (r *rowStreamer) GetType() string {
 	return "QUERY"
 }
 
-
 func (r *QueryResult) Render() (table.Writer, error) {
 	tw := table.NewWriter()
 

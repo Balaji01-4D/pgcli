@@ -25,8 +25,6 @@ const (
 	MaxLenPrompt  = 30
 )
 
-
-
 type Postgres struct {
 	CurrentBD           string
 	Executor            *Executor
@@ -35,7 +33,7 @@ type Postgres struct {
 	ctx                 context.Context
 	Config              config.Config
 
-	now					time.Time
+	now time.Time
 }
 
 func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context, cfg config.Config) *Postgres {
@@ -45,12 +43,10 @@ func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context, cfg
 		ForcePasswordPrompt: forcePasswordPrompt,
 		ctx:                 ctx,
 		Config:              cfg,
-		now: time.Now(),
+		now:                 time.Now(),
 	}
 	return postgres
 }
-
-
 
 func (p *Postgres) Connect(host, user, password, database, dsn string, port uint16) error {
 
@@ -131,7 +127,6 @@ func (p *Postgres) GetConnectionInfo() {
 		"URI", p.Executor.URI,
 	)
 }
-
 
 func (p *Postgres) ChangeDatabase(dbName string) error {
 	if !p.IsConnected() {
@@ -277,8 +272,8 @@ func (p *Postgres) getPrompt() string {
 	} else {
 		str = strings.ReplaceAll(str, "\\p", "5432")
 	}
-	
-	str = strings.ReplaceAll(str, "\\n", "\n" )
+
+	str = strings.ReplaceAll(str, "\\n", "\n")
 
 	return str
 }

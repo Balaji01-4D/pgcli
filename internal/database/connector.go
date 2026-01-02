@@ -44,7 +44,7 @@ func NewConfigConnector(host, database, user, password string, port uint16) *Con
 		Password: password,
 		Port:     port,
 	}
-}	
+}
 
 func (c *ConfigConnector) Connect(ctx context.Context) (*pgx.Conn, error) {
 	connConfig, err := pgx.ParseConfig("")
