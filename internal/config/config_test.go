@@ -5,7 +5,7 @@ import (
 	path "path/filepath"
 	"testing"
 
-	"github.com/balaji01-4d/pgxcli/internals/config"
+	"github.com/balaji01-4d/pgxcli/internal/config"
 
 	"github.com/stretchr/testify/assert"
 )

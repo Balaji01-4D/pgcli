@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/balaji01-4d/pgxcli/internals/logger"
-	"github.com/balaji01-4d/pgxcli/internals/parser"
+	"github.com/balaji01-4d/pgxcli/internal/logger"
+	"github.com/balaji01-4d/pgxcli/internal/parser"
 
 	"github.com/jackc/pgx/v5"
 )

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/balaji01-4d/pgxcli/internals/config"
-	"github.com/balaji01-4d/pgxcli/internals/logger"
-	"github.com/balaji01-4d/pgxcli/internals/repl"
+	"github.com/balaji01-4d/pgxcli/internal/config"
+	"github.com/balaji01-4d/pgxcli/internal/logger"
+	"github.com/balaji01-4d/pgxcli/internal/repl"
 
 	osUser "os/user"
 

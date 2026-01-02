@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/balaji01-4d/pgxcli/internals/config"
-	"github.com/balaji01-4d/pgxcli/internals/database"
-	"github.com/balaji01-4d/pgxcli/internals/logger"
+	"github.com/balaji01-4d/pgxcli/internal/config"
+	"github.com/balaji01-4d/pgxcli/internal/database"
+	"github.com/balaji01-4d/pgxcli/internal/logger"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
