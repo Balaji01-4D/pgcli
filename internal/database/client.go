@@ -26,7 +26,7 @@ const (
 )
 
 type Postgres struct {
-	CurrentBD           string
+	CurrentDB           string
 	Executor            *Executor
 	ForcePasswordPrompt bool
 	NeverPasswordPrompt bool
@@ -37,7 +37,6 @@ type Postgres struct {
 }
 
 func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context, cfg config.Config) *Postgres {
-
 	postgres := &Postgres{
 		NeverPasswordPrompt: neverPasswordPrompt,
 		ForcePasswordPrompt: forcePasswordPrompt,
@@ -49,7 +48,6 @@ func New(neverPasswordPrompt, forcePasswordPrompt bool, ctx context.Context, cfg
 }
 
 func (p *Postgres) Connect(host, user, password, database, dsn string, port uint16) error {
-
 	if user == "" {
 		currentUser, err := osUser.Current()
 		if err != nil {
@@ -88,11 +86,10 @@ func (p *Postgres) Connect(host, user, password, database, dsn string, port uint
 		return err
 	}
 	p.Executor = exec
-	p.CurrentBD = database
+	p.CurrentDB = database
 	logger.Log.Info("Database connection established", "database", database, "user", user)
 
 	return nil
-
 }
 
 func (p *Postgres) ConnectDSN(dsn string) error {
@@ -142,12 +139,11 @@ func (p *Postgres) ChangeDatabase(dbName string) error {
 		"",
 		p.ctx,
 	)
-
 	if err != nil {
 		return err
 	}
 	p.Executor = exec
-	p.CurrentBD = dbName
+	p.CurrentDB = dbName
 	logger.Log.Info("Database changed", "database", dbName)
 
 	return nil
@@ -189,7 +185,7 @@ func (p *Postgres) RunCli() error {
 						repl.Print("Previous connection kept")
 					}
 				}
-				repl.Print(fmt.Sprintf("You are now connected to database %q as user %q", p.CurrentBD, p.Executor.User))
+				repl.Print(fmt.Sprintf("You are now connected to database %q as user %q", p.CurrentDB, p.Executor.User))
 				repl.PrintTime(time.Since(start))
 				continue
 			}
@@ -203,7 +199,7 @@ func (p *Postgres) RunCli() error {
 				}
 				repl.Print(
 					fmt.Sprintf("You are connected to database %q as user %q on %s on port %d",
-						p.CurrentBD, p.Executor.User, host, p.Executor.Port,
+						p.CurrentDB, p.Executor.User, host, p.Executor.Port,
 					),
 				)
 				continue
@@ -262,8 +258,8 @@ func (p *Postgres) getPrompt() string {
 		str = strings.ReplaceAll(str, "\\h", "(nil)")
 	}
 
-	if p.CurrentBD != "" {
-		str = strings.ReplaceAll(str, "\\d", p.CurrentBD)
+	if p.CurrentDB != "" {
+		str = strings.ReplaceAll(str, "\\d", p.CurrentDB)
 	} else {
 		str = strings.ReplaceAll(str, "\\d", "(nil)")
 	}
